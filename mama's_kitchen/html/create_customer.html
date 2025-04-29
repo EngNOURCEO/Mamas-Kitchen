@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mama's Kitchen - Customer Registration</title>
+    <link rel="stylesheet" href="/Style/create_customer.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left-container">
+            <div class="logo">
+                <img src="/img/logo.jpg" alt="Mama's Kitchen Logo">
+            </div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">FULL NAME</label>
+                    <input type="text" id="name" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">EMAIL</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">PASSWORD</label>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                </div>
+                
+                <button type="submit">CREATE ACCOUNT</button>
+                <div id="error-message" class="error-message"></div>
+                <div id="success-message" class="success-message"></div>
+            </form>
+
+            <div class="create-account">
+                ALREADY HAVE AN ACCOUNT?<br>
+                <a href="index.html">LOGIN HERE</a>
+            </div>
+        </div>
+        
+        <div class="right-container"></div>
+    </div>
+
+    <script src="/js/create_customer.js"></script>
+</body>
+</html>

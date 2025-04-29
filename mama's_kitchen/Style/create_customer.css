@@ -1,0 +1,356 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f9fa;
+    animation: fadeIn 0.8s ease-out;
+    overflow-x: hidden;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    animation: slideUp 0.6s ease-out;
+    position: relative;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.left-container {
+    flex: 1;
+    padding: 4rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 2;
+}
+
+.right-container {
+    flex: 1;
+    background: url('/img/Food.png') center center/cover;
+    display: none;
+    position: relative;
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: -2.5rem;
+  margin-top: -5rem;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.03);
+}
+
+.logo img {
+    height: auto;
+    width: min(100%, 280px);
+    transition: all 0.3s ease;
+}
+
+.form-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #2d3436;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid rgba(255, 153, 0, 0.3);
+    border-radius: 15px;
+    font-size: 0.9375rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #fff;
+    height: 50 px;
+    color: #2d3436;
+    margin-bottom: -2rem;
+}
+
+input::placeholder {
+    color: #adb5bd;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ff9900;
+    box-shadow: 0 0 0 4px rgba(255, 153, 0, 0.15);
+    background-color: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 1rem;
+    background: #ff9900;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    margin-bottom: -5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+button:hover {
+    background: #e68a00;
+    transform: translateY(-1px);
+}
+
+.create-account {
+    margin-top: 1rem;
+    color: #6c757d;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.create-account a {
+margin-bottom: -5rem;
+    color: #ff9900;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.create-account a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #ff9900;
+    transition: width 0.3s ease;
+}
+
+.create-account a:hover::after {
+    width: 100%;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .right-container {
+        display: block;
+    }
+    
+    .container {
+        margin: 2rem;
+        min-height: 80vh;
+    }
+
+    .left-container {
+        padding: 4rem;
+    }
+
+    .logo img {
+        width: 240px;
+    }
+}
+
+@media (max-width: 767px) {
+    .container {
+        margin: 1rem;
+        border-radius: 16px;
+    }
+
+    .left-container {
+        padding: 2rem;
+        min-height: auto;
+    }
+
+    .form-group label {
+        font-size: 0.8125rem;
+    }
+
+    input {
+        padding: 0.875rem 1rem;
+        height: 48px;
+    }
+
+    button {
+        padding: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .left-container {
+        padding: 1.5rem;
+    }
+
+    .logo {
+        margin-bottom: 2rem;
+    }
+
+    .logo img {
+        width: 200px;
+    }
+
+    .create-account {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Error States */
+.error-message {
+    color: #dc3545;
+    font-size: 0.8125rem;
+    margin: 0.5rem 0;
+    height: 20px;
+}
+
+.input-error {
+    border-color: #dc3545 !important;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+button:disabled {
+    background: #ffc107 !important;
+    cursor: not-allowed;
+    transform: none !important;
+    opacity: 0.8;
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 0.875rem;
+    text-align: center;
+    margin: 1rem 0;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: flex-end; /* Align to right edge */
+    align-items: center;
+    background: #f8f9fa;
+    animation: fadeIn 0.8s ease-out;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    animation: slideUp 0.6s ease-out;
+    position: relative;
+    background: transparent;
+    margin: 0;
+}
+
+.left-container {
+    flex: 0 0 50%;
+    padding: 4rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: white;
+    z-index: 2;
+    margin-right: 50%; /* Make space for the fixed image */
+}
+
+.right-container {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    height: 100vh;
+    background: url('/img/Food.png') center center/cover no-repeat;
+    z-index: 1;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+}
+
+/* Rest of your existing styles remain the same */
+/* ... (keep all other CSS rules) ... */
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .left-container {
+        flex: 0 0 60%;
+        margin-right: 40%;
+    }
+    
+    .right-container {
+        width: 40%;
+    }
+}
+
+@media (max-width: 992px) {
+    body {
+        justify-content: center;
+    }
+    
+    .left-container {
+        flex: 0 0 100%;
+        margin-right: 0;
+        padding: 4rem 2rem;
+        background: rgba(255,255,255,0.98);
+        backdrop-filter: blur(5px);
+    }
+    
+    .right-container {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .left-container {
+        padding: 3rem 1.5rem;
+        min-height: auto;
+    }
+    
+    .logo img {
+        width: 180px;
+    }
+}
