@@ -98,3 +98,31 @@ document.getElementById("mealUploadForm").addEventListener("submit", async (e) =
 
 
 
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('header');
+  header.classList.toggle('header-scrolled', window.scrollY > 50);
+});
+// Theme toggle (same as homepage)
+function toggleTheme() {
+  const html = document.documentElement;
+  const themeToggle = document.querySelector('.theme-toggle');
+  
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    themeToggle.textContent = '🌙 Dark Mode';
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '🌞 Light Mode';
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+// Initialize theme
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.querySelector('.theme-toggle').textContent = '🌞 Light Mode';
+  }
+});
