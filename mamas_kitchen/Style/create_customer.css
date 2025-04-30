@@ -306,7 +306,7 @@ body {
     bottom: 0;
     width: 50%;
     height: 100vh;
-    background: url('/img/Food.png') center center/cover no-repeat;
+    background: url('/mamas_kitchen/img/Food.png') center center/cover no-repeat;
     z-index: 1;
     box-shadow: -10px 0 30px rgba(0,0,0,0.05);
 }
@@ -352,5 +352,5 @@ body {
     
     .logo img {
         width: 180px;
-    }
+}
 }

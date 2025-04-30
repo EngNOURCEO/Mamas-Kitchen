@@ -6,7 +6,7 @@ import os
 import logging
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(_name_)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -15,7 +15,11 @@ app.logger.setLevel(logging.DEBUG)
 # Configure CORS
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.1:5501"],
+        "origins": [
+            "http://localhost:5000", 
+            "http://127.0.0.1:5000", 
+            "http://127.0.0.1:5501"
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
@@ -83,6 +87,7 @@ def login():
     except Exception as e:
         app.logger.error(f'Login error: {str(e)}', exc_info=True)
         return jsonify({'message': 'Server error during authentication'}), 500
+
 #---------------------------------------------------------------
 
 @app.route('/customer/register', methods=['POST'])
@@ -129,6 +134,7 @@ def register_customer():
             'error': 'Registration failed',
             'details': str(e)
         }), 500
+
 ###---------------------------------------------------------
 
 @app.route('/debug/user', methods=['POST'])
@@ -159,7 +165,6 @@ def debug_user():
         }
     
     return jsonify(result)
-
 
 #######---------------------------------
 
@@ -214,8 +219,32 @@ def register_cook():
             'error': 'Registration failed',
             'details': str(e)
         }), 500
+
 ###3-----------------------------------------
 
+@app.route('/cooks', methods=['GET'])
+def get_all_cooks():
+    try:
+        cooks = Cook.query.all()
+        cook_list = []
+        for cook in cooks:
+            cook_list.append({
+                'id': cook.cook_id,
+                'name': cook.cook_name,
+                'email': cook.cook_email,
+                'gender': cook.cook_gender,
+                'location': cook.cook_location,
+                'phone': cook.cook_phone
+            })
+        
+        app.logger.debug(f"Cook data: {cook_list}")  # سجل البيانات في الخادم
+        return jsonify({'cooks': cook_list})
+    
+    except Exception as e:
+        app.logger.error(f"Error fetching cooks: {str(e)}", exc_info=True)
+        return jsonify({'message': 'Server error fetching cooks'}), 500
+
+# Main entry point
 @app.before_request
 def log_request_info():
     app.logger.debug(f"\n{'='*50}\nRequest: {request.method} {request.path}")
@@ -226,5 +255,5 @@ def log_request_info():
         app.logger.debug(f"Raw Body: {request.get_data()}")
     app.logger.debug(f"{'='*50}\n")
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if _name_ == '_main_':
+    app.run(debug=True, host='0.0.0.0',port=5000)

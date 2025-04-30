@@ -24,7 +24,7 @@ class Meal(db.Model):
     meal_id = db.Column(db.Integer, primary_key=True)
     cook_id = db.Column(db.Integer, db.ForeignKey('cook.cook_id', ondelete='CASCADE'))
     meal_recipe = db.Column(db.Text)
-    meal_photo = db.Column(db.Text)
+    image = db.Column(db.Text)
     meal_price = db.Column(db.Numeric(10,2))
     meal_name = db.Column(db.String(255))
 

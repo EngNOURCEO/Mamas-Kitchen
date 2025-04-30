@@ -50,7 +50,7 @@ body {
     top: 0;
     bottom: 0;
     width: 50%;
-    background: url('/img/Food.png') center center;
+    background: url('/mamas_kitchen/img/Food.png') center center;
     background-size: cover;
     z-index: 1;
     display: none;
