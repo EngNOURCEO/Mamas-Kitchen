@@ -2,7 +2,7 @@ from flask import Flask, request, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import db
-from models import Cook, Customer, Meal
+from models import Cook, Customer, Meal, Rating
 import os
 import logging
 import sqlite3
@@ -90,6 +90,7 @@ def check_session():
             "name": session['name']
         }), 200
     return jsonify({"logged_in": False}), 401
+
 
 # ------------------ CUSTOMER REGISTRATION -------------------
 @app.route('/customer/register', methods=['POST'])
@@ -210,31 +211,32 @@ def get_cook_profile(cook_id):
 # ---------------------- GET MEALS BY COOK -------------------
 @app.route('/meals/<int:cook_id>', methods=['GET'])
 def get_meals_by_cook(cook_id):
-    # Assuming you already have a session to query the database
     meals = db.session.query(Meal).filter(Meal.cook_id == cook_id).all()
 
-    # Convert the data to a JSON-serializable format
     meal_list = [{
-    'meal_name': meal.meal_name,
-    'meal_price': float(meal.meal_price),
-    'image': base64.b64encode(meal.image.tobytes()).decode('utf-8') if isinstance(meal.image, memoryview) else meal.image
-     } for meal in meals]
+        'name': meal.meal_name,
+        'price': float(meal.meal_price),
+        'description': meal.meal_recipe,
+        'image': base64.b64encode(meal.image.tobytes()).decode('utf-8') if isinstance(meal.image, memoryview) else meal.image
+    } for meal in meals]
 
-
-    # Return the list as a JSON response
     return jsonify({"meals": meal_list})
+
 
 
 # ---------------------- UPLOAD MEAL -------------------------
 @app.route('/add_meal', methods=['POST'])
 def add_meal():
+    # Get the cook ID from session only
+    cook_id = session.get('user_id')
+    app.logger.debug(f"Session cook_id: {cook_id}")
+    
     meal_name = request.form.get('meal_name')
     meal_price = request.form.get('meal_price')
     meal_recipe = request.form.get('recipe')
     image_file = request.files.get('image')
-    cook_id = request.form.get('cook_id')
 
-    if not all([meal_name, meal_price, meal_recipe, image_file, cook_id]):
+    if not all([meal_name, meal_price, meal_recipe, image_file]):
         return jsonify({"success": False, "error": "Missing fields"}), 400
 
     image_bytes = image_file.read()
@@ -244,13 +246,43 @@ def add_meal():
         meal_price=meal_price,
         meal_recipe=meal_recipe,
         image=image_bytes,
-        cook_id=int(cook_id)
+        cook_id=cook_id  # Securely assign cook_id from session
     )
 
     db.session.add(new_meal)
     db.session.commit()
 
     return jsonify({"success": True})
+#--------------------------------------
+@app.route('/submit_rating', methods=['POST'])
+def submit_rating():
+    # Get the JSON data from the request
+    data = request.json
+    customer_id = data.get('customer_id')
+    cook_id = data.get('cook_id')
+    rating_value = data.get('rating_value')
+
+    # Validate rating value
+    if not (1 <= rating_value <= 5):
+        return jsonify({"message": "Rating must be between 1 and 5."}), 400
+
+    # Check if the customer has already rated this cook
+    existing_rating = Rating.query.filter_by(customer_id=customer_id, cook_id=cook_id).first()
+    if existing_rating:
+        return jsonify({"message": "You have already rated this cook."}), 400
+
+    # Create a new rating
+    new_rating = Rating(customer_id=customer_id, cook_id=cook_id, rating_value=rating_value)
+
+    try:
+        db.session.add(new_rating)
+        db.session.commit()
+        return jsonify({"message": "Rating submitted successfully!"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Error: {str(e)}"}), 500
+
+
 
 
 # ---------------------- DEBUG USER --------------------------
@@ -303,4 +335,4 @@ def add_cors_headers(response):
 
 # ---------------------- MAIN ENTRY --------------------------
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0',port=5000)
