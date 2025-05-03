@@ -56,19 +56,30 @@
         const gallery = document.getElementById("mealGallery");
         gallery.innerHTML = "";
 
+       
         data.meals.forEach(meal => {
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
             <img src="data:image/jpeg;base64,${meal.image}" 
-                 data-name="${meal.name}" 
+                 class="loading"
+                 data-name="${meal.name}"
                  data-price="${meal.price}" 
                  data-description="${meal.description}"
                  alt="${meal.name}">
           `;
+          
+          // Add image load handler
+          const img = card.querySelector('img');
+          img.onload = () => {
+            img.classList.remove('loading');
+            img.style.animation = 'fadeIn 0.6s ease-out';
+          };
+          
           gallery.appendChild(card);
         });
-
+        
+       
         // Meal card click behavior
         let selectedImage = null;
         document.querySelectorAll('.gallery .card img').forEach(img => {

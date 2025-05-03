@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cook Profile</title>
   <link rel="stylesheet" href="/mamas_kitchen/Style/profile.css" />
+  
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
@@ -66,9 +68,24 @@
       </div>
       <div class="meal-details">
         <img id="displayMealImage" />
-        <h2 id="displayMealName"></h2>
-        <p id="displayMealPrice"></p>
-        <p id="displayMealDescription"></p>
+        <div style="display: flex; gap: 20px; align-items: center;">
+          <div class="d">
+            
+            <p>Name:</p> <h2 id="displayMealName"></h2>
+          </div>
+          <div class="d">
+
+          </div>
+          <div class="d">
+            <p>Price:</p><p id="displayMealPrice"></p>
+
+          </div>
+          <div class="d">
+            <p>Recipe:</p> <p id="displayMealDescription"> </p>
+            
+          </div>
+        </div>
+       
       </div>
       
     </section>
