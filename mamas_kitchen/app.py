@@ -1,4 +1,6 @@
-from flask import Flask, request, session
+from flask import Flask, render_template, request, redirect, url_for, session
+import os
+from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import db
@@ -9,6 +11,9 @@ import sqlite3
 from flask import jsonify
 from sqlalchemy.orm import sessionmaker
 import base64
+from datetime import datetime
+
+
 
 
 # Initialize Flask app
@@ -22,8 +27,15 @@ app.logger.setLevel(logging.DEBUG)
 app.config.from_pyfile('config.py')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
-# Enable CORS with credentials
+# Set the folder to save uploaded files
+app.config['UPLOAD_FOLDER'] = 'static/profile_images'
+app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'gif'}
 CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5501"]}}, supports_credentials=True)
+
+# Check if the file has a valid extension
+
+# Enable CORS with credentials
+
 
 # Initialize database
 db.init_app(app)
@@ -34,6 +46,65 @@ with app.app_context():
 @app.route('/')
 def home():
     return "✅ Mama's Kitchen API is running!"
+
+#-------------------------------------
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# Route to upload a profile image
+@app.route('/upload_profile_image', methods=['POST'])
+def upload_profile_image():
+    if 'file' not in request.files:
+        return 'No file part', 400
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file', 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        # Save the file path to the database (e.g., for the user profile)
+        # Update the user's profile with the image path, assuming `cook_id` is known
+        cook_id = request.form['cook_id']  # Example: getting cook ID from form data
+        update_profile_image_in_db(cook_id, filename)
+
+        return redirect(url_for('profile', cook_id=cook_id))  # Redirect to the profile page
+    return 'Invalid file type', 400
+
+# Function to update profile image path in the database
+def update_profile_image_in_db(cook_id, filename):
+    # Update the user's profile in the database (example function)
+    # This assumes you have a database set up and a table to store user data
+    pass
+
+# Route to display the cook's profile page
+@app.route('/profile/<int:cook_id>')
+def profile(cook_id):
+    # Get cook profile from the database
+    user = Cook.query.get(cook_id)
+    profile_image = user.profile_image if user.profile_image else 'default_profile_image.jpg'
+
+    # Rating logic
+    customer_id = session.get('user_id') if session.get('user_type') == 'customer' else None
+    user_rating = None
+    if customer_id:
+        rating_entry = Rating.query.filter_by(cook_id=cook_id, customer_id=customer_id).first()
+        if rating_entry:
+            user_rating = rating_entry.rating_value
+
+    # Get average rating for cook
+    avg_rating = db.session.query(db.func.avg(Rating.rating_value)).filter_by(cook_id=cook_id).scalar()
+    avg_rating = round(avg_rating, 1) if avg_rating else None
+
+    return render_template('profile.html',
+                           cook=user,
+                           profile_image=profile_image,
+                           user_rating=user_rating,
+                           average_rating=avg_rating)
+
+
+
 
 # -------------------------- LOGIN --------------------------
 @app.route('/login', methods=['POST'])
@@ -196,6 +267,9 @@ def get_cook_profile(cook_id):
     cook = Cook.query.filter_by(cook_id=cook_id).first()
     if not cook:
         return jsonify({'error': 'Cook not found'}), 404
+    ratings = Rating.query.filter_by(cook_id=cook_id).all()
+    avg_rating = round(sum(r.rating_value for r in ratings) / len(ratings), 1) if ratings else None
+
     return jsonify({
         'cook': {
             'id': cook.cook_id,
@@ -204,9 +278,10 @@ def get_cook_profile(cook_id):
             'gender': cook.cook_gender,
             'location': cook.cook_location,
             'phone': cook.cook_phone,
-         
+            'average_rating': avg_rating  # ✅ added here
         }
     })
+    
 
 # ---------------------- GET MEALS BY COOK -------------------
 @app.route('/meals/<int:cook_id>', methods=['GET'])
@@ -256,31 +331,33 @@ def add_meal():
 #--------------------------------------
 @app.route('/submit_rating', methods=['POST'])
 def submit_rating():
-    # Get the JSON data from the request
-    data = request.json
+    data = request.get_json()
     customer_id = data.get('customer_id')
     cook_id = data.get('cook_id')
     rating_value = data.get('rating_value')
 
-    # Validate rating value
-    if not (1 <= rating_value <= 5):
-        return jsonify({"message": "Rating must be between 1 and 5."}), 400
+    if not all([customer_id, cook_id, rating_value]):
+        return jsonify({'message': 'Missing data'}), 400
 
-    # Check if the customer has already rated this cook
-    existing_rating = Rating.query.filter_by(customer_id=customer_id, cook_id=cook_id).first()
-    if existing_rating:
-        return jsonify({"message": "You have already rated this cook."}), 400
+    # Check if rating already exists
+    rating = Rating.query.filter_by(customer_id=customer_id, cook_id=cook_id).first()
 
-    # Create a new rating
-    new_rating = Rating(customer_id=customer_id, cook_id=cook_id, rating_value=rating_value)
+    if rating:
+        rating.rating_value = rating_value  # Update existing rating
+    else:
+        rating = Rating(customer_id=customer_id, cook_id=cook_id, rating_value=rating_value)
+        db.session.add(rating)
 
-    try:
-        db.session.add(new_rating)
-        db.session.commit()
-        return jsonify({"message": "Rating submitted successfully!"}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"message": f"Error: {str(e)}"}), 500
+    db.session.commit()
+
+    return jsonify({'message': 'Rating submitted successfully!', 'rating_value': rating_value})
+
+
+
+    
+#----------------------------------------------
+
+
 
 
 

@@ -1,6 +1,8 @@
 # models.py
 
 from database import db
+from datetime import datetime
+
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -28,12 +30,21 @@ class Meal(db.Model):
     meal_price = db.Column(db.Numeric(10,2))
     meal_name = db.Column(db.String(255))
 
+
 class Rating(db.Model):
     __tablename__ = 'rating'
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.customer_id', ondelete='CASCADE'), primary_key=True)
-    cook_id = db.Column(db.Integer, db.ForeignKey('cook.cook_id', ondelete='CASCADE'), primary_key=True)
-    rating_date = db.Column(db.Date)
-    rating_value = db.Column(db.Integer)
+
+    rating_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.customer_id', ondelete='CASCADE'), nullable=False)
+    cook_id = db.Column(db.Integer, db.ForeignKey('cook.cook_id', ondelete='CASCADE'), nullable=False)
+
+    rating_date = db.Column(db.Date, default=datetime.utcnow)
+    rating_value = db.Column(db.Integer, nullable=False)
+
+    customer = db.relationship('Customer', backref=db.backref('ratings_given', lazy=True))
+    cook = db.relationship('Cook', backref=db.backref('ratings_received', lazy=True))
+
+
 
 class CookMeal(db.Model):
     __tablename__ = 'cook_meal'

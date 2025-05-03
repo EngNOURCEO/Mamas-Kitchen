@@ -17,7 +17,7 @@
       themeToggle.textContent = '🌙 Dark Mode';
       localStorage.setItem('theme', 'light');
     } else {
-      html.setAttribute('data-theme', 'dark');
+      html.setAttribute('data-theme', 'dark');    
       themeToggle.textContent = '🌞 Light Mode';
       localStorage.setItem('theme', 'dark');
     }
@@ -73,11 +73,10 @@
         let selectedImage = null;
         document.querySelectorAll('.gallery .card img').forEach(img => {
           img.addEventListener('click', () => {
-            const mealImage = document.getElementById('displayMealImage');
-            const mealPrice = document.getElementById('displayMealPrice');
-            const mealDescription = document.getElementById('displayMealDescription');
-            const mealName = document.getElementById('displayMealName');
-            
+            const mealImage = document.getElementById('mealImage');
+            const mealPrice = document.getElementById('mealPrice');
+            const mealDescription = document.getElementById('mealDescription');
+            const mealName = document.getElementById('mealName');
 
             if (selectedImage === img) {
               mealImage.src = "";
@@ -102,33 +101,30 @@
       });
 
     // Show or hide "Add Meal" button based on session
-let customerId = null;  // Global variable to store the customer ID
+    fetch('http://127.0.0.1:5000/check_session', {
+      credentials: "include"
+    })
+      .then(res => res.json())
+      .then(sessionData => {
+        const addMealBtn = document.getElementById("addMealBtn");
+        if (
+          sessionData.logged_in &&
+          sessionData.user_type === "cook" &&
+          sessionData.user_id == cookId
+        ) {
+          addMealBtn.style.display = "block";
+        } else {
+          addMealBtn.style.display = "none";
+        }
 
-fetch('http://127.0.0.1:5000/check_session', {
-  credentials: "include"
-})
-  .then(res => res.json())
-  .then(sessionData => {
-    const addMealBtn = document.getElementById("addMealBtn");
-    if (
-      sessionData.logged_in &&
-      sessionData.user_type === "cook" &&
-      sessionData.user_id == cookId
-    ) {
-      addMealBtn.style.display = "block";
-    } else {
-      addMealBtn.style.display = "none";
-    }
-
-    if (sessionData.logged_in && sessionData.user_type === 'customer') {
-      document.getElementById('addMealBtn')?.remove();
-      customerId = sessionData.user_id;  // ✅ Store for rating use
-    }
-  })
-  .catch(err => {
-    console.error("Error checking session:", err);
-  });
-
+        // Optional: explicitly remove for customers
+        if (sessionData.logged_in && sessionData.user_type === 'customer') {
+          document.getElementById('addMealBtn')?.remove();
+        }
+      })
+      .catch(err => {
+        console.error("Error checking session:", err);
+      });
 
     // Header scroll effect
     window.addEventListener('scroll', () => {
@@ -172,38 +168,46 @@ fetch('http://127.0.0.1:5000/check_session', {
         alert("Failed to upload meal.");
       }
     });
-    const submitRatingBtn = document.getElementById("submitRatingBtn");
-    if (submitRatingBtn) {
-      submitRatingBtn.addEventListener("click", () => {
-        const ratingInput = document.getElementById("ratingInput");
-        const ratingValue = parseInt(ratingInput.value, 10);
+  });
+  function submitRating() {
+    const ratingInput = document.getElementById("ratingInput");
+    const ratingValue = parseInt(ratingInput.value, 10);
+    const cookId = 1;  // The cook's ID, which can be dynamically set
+    const customerId = 1;  // The customer's ID, which should be retrieved from session or user data
   
-        if (!customerId || !cookId) {
-          alert("You must be logged in as a customer to rate.");
-          return;
+    if (ratingValue >= 1 && ratingValue <= 5) {
+      // Prepare the data to send to the server
+      const data = {
+        customer_id: customerId,
+        cook_id: cookId,
+        rating_value: ratingValue
+      };
+  
+      // Send the rating to the backend
+      fetch('http://127.0.0.1:5000/submit_rating', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === "Rating submitted successfully!") {
+          alert("Thank you for your rating!");
+        } else {
+          alert("Error: " + data.message);
         }
+      })
+      .catch(err => {
+        console.error("Error submitting rating:", err);
+        alert("An error occurred. Please try again.");
+      });
   
-        if (ratingValue >= 1 && ratingValue <= 5) {
-          const data = {
-            customer_id: customerId,
-            cook_id: cookId,
-            rating_value: ratingValue
-          };
-          fetch('/submit_rating', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              cook_id: cookId,
-              customer_id: customerId,
-              rating_value: selectedRating
-            }),
-            credentials: 'include'
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.message);
-            // Refresh the page or re-fetch data
-            location.reload();
-          });
-          
-      }})}} );       
+      // Clear the rating input field
+      ratingInput.value = '';
+    } else {
+      alert("Please enter a valid rating between 1 and 5.");
+    }
+  }
+  
