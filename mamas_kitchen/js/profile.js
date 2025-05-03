@@ -3,6 +3,7 @@
   const params = new URLSearchParams(window.location.search);
   const cookId = params.get("cook_id");
 
+
   if (!cookId) {
     alert("Cook ID not found.");
   }
@@ -44,6 +45,13 @@
         document.getElementById("cookEmail").textContent = cook.email;
         document.getElementById("cookLocation").textContent = cook.location;
         document.getElementById("cookPhone").textContent = cook.phone;
+        const ratingDisplay = document.getElementById("cookRating");
+    if (cook.average_rating !== null) {
+      ratingDisplay.textContent = `⭐ ${cook.average_rating} / 5`;
+    } else {
+      ratingDisplay.textContent = "No ratings yet";
+    }
+  
       })
       .catch(err => {
         console.error("Error fetching cook profile:", err);
@@ -113,7 +121,7 @@
       });
 
     // Show or hide "Add Meal" button based on session
-let customerId = null;  // Global variable to store the customer ID
+  // Global variable to store the customer ID
 
 fetch('http://127.0.0.1:5000/check_session', {
   credentials: "include"
@@ -183,38 +191,65 @@ fetch('http://127.0.0.1:5000/check_session', {
         alert("Failed to upload meal.");
       }
     });
-    const submitRatingBtn = document.getElementById("submitRatingBtn");
-    if (submitRatingBtn) {
-      submitRatingBtn.addEventListener("click", () => {
-        const ratingInput = document.getElementById("ratingInput");
-        const ratingValue = parseInt(ratingInput.value, 10);
-  
-        if (!customerId || !cookId) {
-          alert("You must be logged in as a customer to rate.");
-          return;
-        }
-  
-        if (ratingValue >= 1 && ratingValue <= 5) {
-          const data = {
-            customer_id: customerId,
-            cook_id: cookId,
-            rating_value: ratingValue
-          };
-          fetch('/submit_rating', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              cook_id: cookId,
-              customer_id: customerId,
-              rating_value: selectedRating
-            }),
-            credentials: 'include'
-          })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.message);
-            // Refresh the page or re-fetch data
-            location.reload();
-          });
+// Rating submission
+// Rating submission - FINAL WORKING VERSION
+// Rating submission - FINAL WORKING VERSION
+// Rating submission - FINAL WORKING VERSION
+// Rating submission - FINAL CORRECTED VERSION
+const submitRatingBtn = document.getElementById("submitRatingBtn");
+
+if (submitRatingBtn) {
+  submitRatingBtn.addEventListener("click", async () => {
+    try {
+      const ratingInput = document.getElementById("ratingInput");
+      const ratingValue = parseInt(ratingInput.value, 10);
+
+      // 1. First get the current session
+      const sessionRes = await fetch('http://127.0.0.1:5000/check_session', {
+        credentials: 'include'
+      });
+      const sessionData = await sessionRes.json();
+      
+      if (!sessionData.logged_in || sessionData.user_type !== 'customer') {
+        alert("You must be logged in as a customer to rate.");
+        return;
+      }
+      
+      const ratingData = {
+        customer_id: sessionData.customer_id, // ✅ use `customer_id` not `user_id`
+        cook_id: cookId,
+        rating_value: ratingValue
+      };
+      
+      
+
+      console.log("Submitting rating:", ratingData);
+
+      // 4. Submit the rating
+      const ratingRes = await fetch("http://127.0.0.1:5000/submit_rating", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(ratingData)
+      });
+
+      const result = await ratingRes.json();
+      
+      if (!ratingRes.ok) {
+        throw new Error(result.message || "Rating submission failed");
+      }
+
+      alert("Rating submitted successfully!");
+      location.reload();
+    } catch (error) {
+      console.error("Rating error:", error);
+      alert(error.message || "Failed to submit rating. Please try again.");
+    }
+  });
+}
+}
           
-      }})}} );       
+      );   
+  

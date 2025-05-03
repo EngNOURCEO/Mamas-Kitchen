@@ -10,6 +10,7 @@ import logging
 import sqlite3
 from flask import jsonify
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 import base64
 from datetime import datetime
 
@@ -123,7 +124,7 @@ def login():
     customer = Customer.query.filter_by(customer_email=email).first()
 
     if cook and check_password_hash(cook.cook_pass, password):
-        session['user_id'] = cook.cook_id
+        session['cook_id'] = cook.cook_id
         session['user_type'] = 'cook'
         session['name'] = cook.cook_name
 
@@ -136,7 +137,7 @@ def login():
         }), 200
 
     if customer and check_password_hash(customer.customer_pass, password):
-        session['user_id'] = customer.customer_id
+        session['customer_id'] = customer.customer_id
         session['user_type'] = 'customer'
         session['name'] = customer.customer_name
 
@@ -151,16 +152,25 @@ def login():
     return jsonify({'message': 'Invalid email or password'}), 401
 
 # ---------------------- SESSION CHECK -----------------------
-@app.route('/check_session', methods=['GET'])
+@app.route('/check_session')
 def check_session():
-    if 'user_id' in session:
+    if 'customer_id' in session:
         return jsonify({
-            "logged_in": True,
-            "user_id": session['user_id'],
-            "user_type": session['user_type'],
-            "name": session['name']
-        }), 200
-    return jsonify({"logged_in": False}), 401
+            'logged_in': True,
+            'user_type': 'customer',
+            'user_id': session['customer_id'],
+            'customer_id': session['customer_id']  # ✅ ensure this exists
+        })
+    elif 'cook_id' in session:
+        return jsonify({
+            'logged_in': True,
+            'user_type': 'cook',
+            'user_id': session['cook_id'],
+            'cook_id': session['cook_id']  # ✅ ensure this exists
+        })
+    return jsonify({'logged_in': False})
+
+
 
 
 # ------------------ CUSTOMER REGISTRATION -------------------
@@ -265,10 +275,10 @@ def get_all_cooks():
 @app.route('/cooks/<int:cook_id>', methods=['GET'])
 def get_cook_profile(cook_id):
     cook = Cook.query.filter_by(cook_id=cook_id).first()
-    if not cook:
-        return jsonify({'error': 'Cook not found'}), 404
-    ratings = Rating.query.filter_by(cook_id=cook_id).all()
-    avg_rating = round(sum(r.rating_value for r in ratings) / len(ratings), 1) if ratings else None
+    if cook:
+        # Calculate the average rating
+        ratings = Rating.query.filter_by(cook_id=cook_id).all()
+        average_rating = sum(rating.rating_value for rating in ratings) / len(ratings) if ratings else None
 
     return jsonify({
         'cook': {
@@ -278,7 +288,7 @@ def get_cook_profile(cook_id):
             'gender': cook.cook_gender,
             'location': cook.cook_location,
             'phone': cook.cook_phone,
-            'average_rating': avg_rating  # ✅ added here
+            "average_rating": average_rating   # ✅ added here
         }
     })
     
@@ -303,7 +313,8 @@ def get_meals_by_cook(cook_id):
 @app.route('/add_meal', methods=['POST'])
 def add_meal():
     # Get the cook ID from session only
-    cook_id = session.get('user_id')
+    cook_id = request.form.get("cook_id")
+
     app.logger.debug(f"Session cook_id: {cook_id}")
     
     meal_name = request.form.get('meal_name')
@@ -326,33 +337,121 @@ def add_meal():
 
     db.session.add(new_meal)
     db.session.commit()
+    app.logger.debug(f"Adding meal for cook_id from session: {cook_id}")
+
 
     return jsonify({"success": True})
 #--------------------------------------
 @app.route('/submit_rating', methods=['POST'])
 def submit_rating():
-    data = request.get_json()
-    customer_id = data.get('customer_id')
-    cook_id = data.get('cook_id')
-    rating_value = data.get('rating_value')
+    try:
+        # 1. Get and validate request data
+        data = request.get_json()
+        if not data:
+            app.logger.error("No JSON data received")
+            return jsonify({'success': False, 'message': 'No data provided'}), 400
 
-    if not all([customer_id, cook_id, rating_value]):
-        return jsonify({'message': 'Missing data'}), 400
+        app.logger.debug(f"Received rating data: {data}")
 
-    # Check if rating already exists
-    rating = Rating.query.filter_by(customer_id=customer_id, cook_id=cook_id).first()
+        # 2. Validate required fields
+        required_fields = ['customer_id', 'cook_id', 'rating_value']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            app.logger.error(f"Missing required fields: {missing_fields}")
+            return jsonify({
+                'success': False,
+                'message': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
 
-    if rating:
-        rating.rating_value = rating_value  # Update existing rating
-    else:
-        rating = Rating(customer_id=customer_id, cook_id=cook_id, rating_value=rating_value)
-        db.session.add(rating)
+        # 3. Validate data types and values
+        try:
+            customer_id = int(data['customer_id'])
+            cook_id = int(data['cook_id'])
+            rating_value = int(data['rating_value'])
+            
+            if not (1 <= rating_value <= 5):
+                raise ValueError("Rating must be between 1-5")
+                
+        except (ValueError, TypeError) as e:
+            app.logger.error(f"Invalid data format: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Invalid data format: ' + str(e)
+            }), 400
 
-    db.session.commit()
+        # 4. Check if customer and cook exist
+        customer = Customer.query.get(customer_id)
+        cook = Cook.query.get(cook_id)
+        
+        if not customer:
+            app.logger.error(f"Customer not found: {customer_id}")
+            return jsonify({
+                'success': False,
+                'message': 'Customer not found'
+            }), 404
+            
+        if not cook:
+            app.logger.error(f"Cook not found: {cook_id}")
+            return jsonify({
+                'success': False,
+                'message': 'Cook not found'
+            }), 404
 
-    return jsonify({'message': 'Rating submitted successfully!', 'rating_value': rating_value})
+        # 5. Create or update rating
+        rating = Rating.query.filter_by(
+            customer_id=customer_id,
+            cook_id=cook_id
+        ).first()
+
+        if rating:
+            app.logger.debug(f"Updating existing rating (ID: {rating.rating_id}) from {rating.rating_value} to {rating_value}")
+            rating.rating_value = rating_value
+            action = 'updated'
+        else:
+            app.logger.debug(f"Creating new rating for customer {customer_id} and cook {cook_id}")
+            rating = Rating(
+                customer_id=customer_id,
+                cook_id=cook_id,
+                rating_value=rating_value,
+                rating_date=datetime.utcnow()
+            )
+            db.session.add(rating)
+            action = 'created'
+
+        # 6. Commit changes
+        db.session.commit()
+        app.logger.info(f"New rating saved with ID: {rating.rating_id}")
 
 
+        # 7. Calculate new average rating
+        avg_rating = db.session.query(
+            db.func.avg(Rating.rating_value)
+        ).filter_by(cook_id=cook_id).scalar()
+        avg_rating = round(float(avg_rating), 1) if avg_rating else None
+
+        return jsonify({
+            'success': True,
+            'message': 'Rating submitted successfully',
+            'rating_id': rating.rating_id,
+            'rating_value': rating_value,
+            'average_rating': avg_rating,
+            'action': action
+        })
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        app.logger.error(f"Database error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Database error'
+        }), 500
+
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An unexpected error occurred'
+        }), 500
 
     
 #----------------------------------------------
