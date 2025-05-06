@@ -8,80 +8,82 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- داخل صفحة Home -->
-<a href="/mamas_kitchen/html/profile.html?id={{ user_id }}" class="profile-icon" title="Profile">👤</a>
+  <!-- داخل صفحة Home -->
+  <!-- تأكد من أن user_id يتم استبداله بالقيمة الصحيحة في السيرفر -->
+  <a href="/mamas_kitchen/html/profile.html?cook_id={{ user_id }}" class="profile-icon" title="Profile">👤</a>
 
-<style>
-  .profile-icon {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  font-size: 24px;
-  text-decoration: none;
-  color: black;
-  transition: transform 0.2s;
-}
-.profile-icon:hover {
-  transform: scale(1.1);
-  color: #333;
-}
-  .card-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
-  }
-  .card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 300px;
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
-</style>  
+  <style>
+    .profile-icon {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      text-decoration: none;
+      color: black;
+      transition: transform 0.2s;
+    }
+    .profile-icon:hover {
+      transform: scale(1.1);
+      color: #333;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+
   <h1>👩🍳 Available Chefs</h1>
-  
+
   <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
 
   <label for="locationFilter">Filter by Location:</label>
   <select id="locationFilter" onchange="filterByLocation()">
     <option value="all">All</option>
     <option value="Cairo">Cairo</option>
-                        <option value="Alexandria">Alexandria</option>
-                        <option value="Giza">Giza</option>
-                        <option value="Shubra El-Kheima">Shubra El-Kheima</option>
-                        <option value="Port Said">Port Said</option>
-                        <option value="Suez">Suez</option>
-                        <option value="Luxor">Luxor</option>
-                        <option value="Mansoura">Mansoura</option>
-                        <option value="El-Mahalla El-Kubra">El-Mahalla El-Kubra</option>
-                        <option value="Tanta">Tanta</option>
-                        <option value="Asyut">Asyut</option>
-                        <option value="Ismailia">Ismailia</option>
-                        <option value="Faiyum">Faiyum</option>
-                        <option value="Zagazig">Zagazig</option>
-                        <option value="Aswan">Aswan</option>
-                        <option value="Damietta">Damietta</option>
-                        <option value="Damanhur">Damanhur</option>
-                        <option value="Minya">Minya</option>
-                        <option value="Beni Suef">Beni Suef</option>
-                        <option value="Qena">Qena</option>
-                        <option value="Sohag">Sohag</option>
-                        <option value="Hurghada">Hurghada</option>
-                        <option value="6th of October City">6th of October City</option>
-                        <option value="Shibin El Kom">Shibin El Kom</option>
-                        <option value="Banha">Banha</option>
-                        <option value="Arish">Arish</option>
-                        <option value="10th of Ramadan City">10th of Ramadan City</option>
-                        <option value="Kafr el-Sheikh">Kafr el-Sheikh</option>
-                        <option value="Marsa Matruh">Marsa Matruh</option>
+    <option value="Alexandria">Alexandria</option>
+    <option value="Giza">Giza</option>
+    <option value="Shubra El-Kheima">Shubra El-Kheima</option>
+    <option value="Port Said">Port Said</option>
+    <option value="Suez">Suez</option>
+    <option value="Luxor">Luxor</option>
+    <option value="Mansoura">Mansoura</option>
+    <option value="El-Mahalla El-Kubra">El-Mahalla El-Kubra</option>
+    <option value="Tanta">Tanta</option>
+    <option value="Asyut">Asyut</option>
+    <option value="Ismailia">Ismailia</option>
+    <option value="Faiyum">Faiyum</option>
+    <option value="Zagazig">Zagazig</option>
+    <option value="Aswan">Aswan</option>
+    <option value="Damietta">Damietta</option>
+    <option value="Damanhur">Damanhur</option>
+    <option value="Minya">Minya</option>
+    <option value="Beni Suef">Beni Suef</option>
+    <option value="Qena">Qena</option>
+    <option value="Sohag">Sohag</option>
+    <option value="Hurghada">Hurghada</option>
+    <option value="6th of October City">6th of October City</option>
+    <option value="Shibin El Kom">Shibin El Kom</option>
+    <option value="Banha">Banha</option>
+    <option value="Arish">Arish</option>
+    <option value="10th of Ramadan City">10th of Ramadan City</option>
+    <option value="Kafr el-Sheikh">Kafr el-Sheikh</option>
+    <option value="Marsa Matruh">Marsa Matruh</option>
   </select>
 
   <div id="cards" class="card-container"></div>

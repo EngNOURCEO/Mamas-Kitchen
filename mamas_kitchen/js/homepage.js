@@ -38,7 +38,6 @@ function filterByLocation() {
   }
 }
 
-// Dark mode toggle remains the same...
 function toggleTheme() {
   const html = document.documentElement;
   const themeToggle = document.querySelector('.theme-toggle');

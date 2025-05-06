@@ -1,4 +1,6 @@
 // --- GLOBAL VARIABLES ---
+console.log("profile.js loaded");
+
 const params = new URLSearchParams(window.location.search);
 const cookId = params.get("cook_id");
 
