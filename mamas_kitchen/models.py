@@ -20,6 +20,8 @@ class Cook(db.Model):
     cook_gender = db.Column(db.String(50))
     cook_location = db.Column(db.String(255))
     cook_phone = db.Column(db.String(20))
+    profile_image = db.Column(db.Text(255), nullable=True)
+
 
 class Meal(db.Model):
     __tablename__ = 'meal'

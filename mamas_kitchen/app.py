@@ -14,6 +14,8 @@ from sqlalchemy.exc import SQLAlchemyError
 import base64
 from datetime import datetime
 
+from werkzeug.utils import secure_filename
+
 
 
 
@@ -28,9 +30,15 @@ app.logger.setLevel(logging.DEBUG)
 app.config.from_pyfile('config.py')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
-# Set the folder to save uploaded files
-app.config['UPLOAD_FOLDER'] = 'static/profile_images'
-app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'gif'}
+
+
+UPLOAD_FOLDER = 'static/profile_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Maximum size of 16MB
+
+
+
 CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5501"]}}, supports_credentials=True)
 
 # Check if the file has a valid extension
@@ -49,35 +57,6 @@ def home():
     return "✅ Mama's Kitchen API is running!"
 
 #-------------------------------------
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-# Route to upload a profile image
-@app.route('/upload_profile_image', methods=['POST'])
-def upload_profile_image():
-    if 'file' not in request.files:
-        return 'No file part', 400
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file', 400
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-
-        # Save the file path to the database (e.g., for the user profile)
-        # Update the user's profile with the image path, assuming `cook_id` is known
-        cook_id = request.form['cook_id']  # Example: getting cook ID from form data
-        update_profile_image_in_db(cook_id, filename)
-
-        return redirect(url_for('profile', cook_id=cook_id))  # Redirect to the profile page
-    return 'Invalid file type', 400
-
-# Function to update profile image path in the database
-def update_profile_image_in_db(cook_id, filename):
-    # Update the user's profile in the database (example function)
-    # This assumes you have a database set up and a table to store user data
-    pass
 
 # Route to display the cook's profile page
 @app.route('/profile/<int:cook_id>')
@@ -104,6 +83,11 @@ def profile(cook_id):
                            user_rating=user_rating,
                            average_rating=avg_rating)
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
 
 
 
@@ -124,6 +108,7 @@ def login():
     customer = Customer.query.filter_by(customer_email=email).first()
 
     if cook and check_password_hash(cook.cook_pass, password):
+        session.clear()
         session['cook_id'] = cook.cook_id
         session['user_type'] = 'cook'
         session['name'] = cook.cook_name
@@ -137,6 +122,7 @@ def login():
         }), 200
 
     if customer and check_password_hash(customer.customer_pass, password):
+        session.clear()
         session['customer_id'] = customer.customer_id
         session['user_type'] = 'customer'
         session['name'] = customer.customer_name
@@ -291,7 +277,39 @@ def get_cook_profile(cook_id):
             "average_rating": average_rating   # ✅ added here
         }
     })
-    
+    #--------------------------------------
+# def allowed_file(filename):
+#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# @app.route('/upload_profile_image', methods=['POST'])
+# def upload_profile_image():
+#     if 'cook_id' not in session:
+#         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+#     file = request.files.get('profile_image')
+#     if not file:
+#         return jsonify({'success': False, 'message': 'No file uploaded'}), 400
+
+#     if file and allowed_file(file.filename):
+#         cook_id = session['cook_id']
+#         filename = secure_filename(f"cook_{cook_id}_" + file.filename)
+#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         file.save(file_path)
+
+#         cook = Cook.query.get(cook_id)
+#         cook.profile_image = filename
+#         db.session.commit()
+
+#         return jsonify({'success': True, 'filename': filename})
+
+#     return jsonify({'success': False, 'message': 'Invalid file type'}), 400
+
+# @app.errorhandler(Exception)
+# def handle_exception(e):
+#     import traceback
+#     traceback.print_exc()
+#     return jsonify({'success': False, 'message': 'Server error'}), 500
+
 
 # ---------------------- GET MEALS BY COOK -------------------
 @app.route('/meals/<int:cook_id>', methods=['GET'])

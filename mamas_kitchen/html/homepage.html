@@ -6,12 +6,48 @@
   <link rel="stylesheet" href="/mamas_kitchen/Style/homepage.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
 </head>
 <body>
   <h1>👩🍳 Available Chefs</h1>
+  
   <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
-  <div id="cards" class="card-container"></div>
-  <script src="/mamas_kitchen/js/homepage.js"></script>
 
+  <label for="locationFilter">Filter by Location:</label>
+  <select id="locationFilter" onchange="filterByLocation()">
+    <option value="all">All</option>
+    <option value="Cairo">Cairo</option>
+                        <option value="Alexandria">Alexandria</option>
+                        <option value="Giza">Giza</option>
+                        <option value="Shubra El-Kheima">Shubra El-Kheima</option>
+                        <option value="Port Said">Port Said</option>
+                        <option value="Suez">Suez</option>
+                        <option value="Luxor">Luxor</option>
+                        <option value="Mansoura">Mansoura</option>
+                        <option value="El-Mahalla El-Kubra">El-Mahalla El-Kubra</option>
+                        <option value="Tanta">Tanta</option>
+                        <option value="Asyut">Asyut</option>
+                        <option value="Ismailia">Ismailia</option>
+                        <option value="Faiyum">Faiyum</option>
+                        <option value="Zagazig">Zagazig</option>
+                        <option value="Aswan">Aswan</option>
+                        <option value="Damietta">Damietta</option>
+                        <option value="Damanhur">Damanhur</option>
+                        <option value="Minya">Minya</option>
+                        <option value="Beni Suef">Beni Suef</option>
+                        <option value="Qena">Qena</option>
+                        <option value="Sohag">Sohag</option>
+                        <option value="Hurghada">Hurghada</option>
+                        <option value="6th of October City">6th of October City</option>
+                        <option value="Shibin El Kom">Shibin El Kom</option>
+                        <option value="Banha">Banha</option>
+                        <option value="Arish">Arish</option>
+                        <option value="10th of Ramadan City">10th of Ramadan City</option>
+                        <option value="Kafr el-Sheikh">Kafr el-Sheikh</option>
+                        <option value="Marsa Matruh">Marsa Matruh</option>
+  </select>
+
+  <div id="cards" class="card-container"></div>
+
+  <script src="/mamas_kitchen/js/homepage.js"></script>
+</body>
 </html>

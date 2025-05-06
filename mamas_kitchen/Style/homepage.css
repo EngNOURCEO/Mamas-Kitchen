@@ -171,3 +171,38 @@ h1::after {
     padding: 1.2rem;
   }
 }
+/* ========== Filter By Location ========== */
+#locationFilter {
+  display: inline-block;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text);
+  margin: 0 auto 2rem auto;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg fill='%236D4C41' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  margin-left: 40px;
+}
+
+#locationFilter:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.2);
+}
+
+label[for="locationFilter"] {
+  display: block;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 40px;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+

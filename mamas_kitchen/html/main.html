@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home Cook Recipes</title>
+  <style>
+    :root {
+      --bg-color: #fff7f0;
+      --text-color: #333;
+      --card-bg: white;
+      --primary: #ff6600;
+      --secondary: #ffa94d;
+      --shadow: rgba(0, 0, 0, 0.15);
+    }
+
+    body.dark-mode {
+      --bg-color: #1e1e1e;
+      --text-color: #f0f0f0;
+      --card-bg: #2b2b2b;
+      --primary: #ff9900;
+      --secondary: #444;
+      --shadow: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: background 0.5s, color 0.5s;
+      animation: fadeInBody 1s ease-in-out;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .header {
+      text-align: center;
+      padding: 60px 20px 30px;
+      background-color: var(--secondary);
+      color: white;
+      border-bottom-left-radius: 60px;
+      border-bottom-right-radius: 60px;
+      box-shadow: 0 10px 20px var(--shadow);
+    }
+
+    .logo {
+      width: 250px;
+      height: 250px;
+      background-color: white;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: popIn 0.8s ease;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .header h1 {
+      margin-bottom: 20px;
+      font-size: 48px;
+      animation: slideDown 0.8s ease forwards;
+    }
+
+    .header p {
+      font-size: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+      opacity: 0;
+      animation: fadeInText 1s ease forwards;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeInText {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px var(--shadow);
+      z-index: 999;
+      transition: background 0.3s;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      padding: 60px 20px;
+      flex-wrap: wrap;
+    }
+
+    .box {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px var(--shadow);
+      text-align: center;
+      width: 320px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
+      animation: fadeInUp 1s ease;
+    }
+
+    .box:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px var(--shadow);
+    }
+
+    @keyframes fadeInUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .box h2 {
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: var(--primary);
+    }
+
+    .box .icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .box button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 15px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .box button:hover {
+      background: #e65c00;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- زر التبديل بين الوضعين -->
+  <button class="mode-toggle" onclick="toggleMode()">Toggle Mode</button>
+
+  <div class="header">
+    <div class="logo">
+      <img src="/mamas_kitchen/img/logo.jpg" alt="Logo">
+    </div>
+
+    <h1>Home Cook Recipes</h1>
+    <p>Discover delicious and trusted homemade meals from talented mothers and chefs. 
+      You can explore recipes and order tasty, home-cooked food you can trust.</p>
+  </div>
+
+  <div class="container">
+    <!-- Customer Box -->
+    <div class="box">
+      <span class="icon">🛒</span>
+      <h2>Customer</h2>
+      <button onclick="window.location.href='index.html'">Login</button>
+      <button onclick="window.location.href='create_customer.html'">Create Account</button>
+    </div>
+
+    <!-- Cooker Box -->
+    <div class="box">
+      <span class="icon">👩‍🍳</span>
+      <h2>Cooker</h2>
+      <button onclick="window.location.href='index.html'">Login</button>
+      <button onclick="window.location.href='create_cook.html'">Create Account</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+  </script>
+
+</body>
+</html>
