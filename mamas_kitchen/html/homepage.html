@@ -8,6 +8,44 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<!-- داخل صفحة Home -->
+<a href="/mamas_kitchen/html/profile.html?id={{ user_id }}" class="profile-icon" title="Profile">👤</a>
+
+<style>
+  .profile-icon {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  text-decoration: none;
+  color: black;
+  transition: transform 0.2s;
+}
+.profile-icon:hover {
+  transform: scale(1.1);
+  color: #333;
+}
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  .card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+</style>  
   <h1>👩🍳 Available Chefs</h1>
   
   <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
